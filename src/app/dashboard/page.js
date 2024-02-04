@@ -11,8 +11,7 @@ export default function Dashboard() {
         return null;
     }
     return (
-        <main className='p-5 bg-[#f6f8fc] h-screen'>
-            <UpperBar />
+        <main className='bg-[#f6f8fc] h-screen'>
             <MainGrid />
         </main>
     )
