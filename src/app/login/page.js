@@ -1,5 +1,4 @@
 "use client"
-import { Button } from '@/components/ui/button';
 import { useUserAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import React from 'react'
@@ -27,10 +26,10 @@ export default function Login() {
                 <Image alt='Avator' src={signImage} className='h-[150px] w-auto rounded-full' placeholder='blur' />
 
                 <p className='text-xs'>Login with google</p>
-                <Button onClick={handleLogin}>
+                <button onClick={handleLogin}>
                     <BsGoogle size={18} color='white' />
                     <div className='mx-5 text-base'>Google</div>
-                </Button>
+                </button>
             </div>
         </div>
     )
