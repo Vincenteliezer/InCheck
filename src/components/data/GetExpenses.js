@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Divider, Table, Skeleton } from "antd"
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, orderBy } from "firebase/firestore";
 import { db } from '@/firebase/config';
 
 
@@ -29,6 +29,11 @@ export default function GetExpenses() {
 
     const columns = [
         {
+            title: 'Time',
+            dataIndex: 'time',
+            key: 'time',
+        },
+        {
             title: 'Expense Type',
             dataIndex: 'expense_type',
             key: 'expense_type',
@@ -49,7 +54,7 @@ export default function GetExpenses() {
             {loading ? (
                 <Skeleton />
             ) : (
-                <Table dataSource={expenses} columns={columns} key="title" rowKey="id" />
+                <Table sticky pagination dataSource={expenses} columns={columns} key="title" rowKey="id" />
             )}
         </>
     )
