@@ -5,12 +5,51 @@ import SearchBar from './reusable/SearchBar'
 import signImage from '/public/images/signImage.png'
 import AntModal from './ui/AntModal'
 import GetExpenses from './data/GetExpenses'
-import AddExpense from './AddExpense'
+import * as Yup from 'yup'
+import { useFormik } from 'formik'
+import AntInput from './ui/AntInput';
+import { Spin, Divider, Input } from 'antd'
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '@/firebase/config';
 
 
 
 export default function MainGrid() {
     const [openModalExpense, setOpenModalExpense] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const expensesCollectionRef = collection(db, "expense_details");
+
+    const { TextArea } = Input;
+
+
+    const formik = useFormik({
+        initialValues: {
+            expense_type: '',
+            amount: '',
+            comment: ''
+        },
+        validationSchema: Yup.object({
+            expense_type: Yup.string()
+                .required("Expense type is required"),
+
+            amount: Yup.number()
+                .integer("Must be a number")
+                .required("Amount is required"),
+            comment: Yup.string()
+                .required("Comment is required")
+        }),
+        onSubmit: async (values, { resetForm }) => {
+            setLoading(true)
+            try {
+                await addDoc(expensesCollectionRef, values);
+                setLoading(false);
+                resetForm();
+                setOpenModalExpense(false);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    })
 
     const handleCancel = () => {
         setOpenModalExpense(false);
@@ -22,8 +61,59 @@ export default function MainGrid() {
     return (
         <>
             <AntModal title="New expense" onCancel={handleCancel} open={openModalExpense}>
-                <AddExpense />
+                <form onSubmit={formik.handleSubmit} className='space-y-6'>
+                    <div>
+                        <AntInput
+                            id='expense_type'
+                            name='expense_type'
+                            type='text'
+                            placeholder='Expense type'
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.expense_type}
+                        />
+                        {formik.touched.expense_type && formik.errors.expense_type ? (
+                            <div className='mt-1 text-red-600 text-xs'>{formik.errors.expense_type}</div>
+                        ) : null}
+                    </div>
+                    <div>
+                        <AntInput
+                            id='amount'
+                            name='amount'
+                            type='number'
+                            placeholder='Amount used'
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.amount}
+                        />
+                        {formik.touched.amount && formik.errors.amount ? (
+                            <div className='mt-1 text-red-600 text-xs'>{formik.errors.amount}</div>
+                        ) : null}
+                    </div>
+                    <div>
+                        <TextArea rows={4}
+                            id='comment'
+                            name='comment'
+                            type='textarea'
+                            placeholder='Comment on expense'
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.comment}
+                        />
+                        {formik.touched.comment && formik.errors.comment ? (
+                            <div className='mt-1 text-red-600 text-xs'>{formik.errors.comment}</div>
+                        ) : null}
+                    </div>
+                    <Divider orientation='center'>*</Divider>
+
+                    <button type="submit" className='bg-blue-500 w-full mt-4  p-3 rounded-md font-medium text-white'>
+                        {loading ? (
+                            <Spin />
+                        ) : "Add Expense"}
+                    </button>
+                </form>
             </AntModal>
+
             <div className='grid grid-cols-12 gap-6 px-6 h-screen'>
                 <div className='col-span-3 overflow-auto'>
                     <div className='flex items-center space-x-3 sticky top-0 bg-[#f6f8fc] z-50 py-2'>

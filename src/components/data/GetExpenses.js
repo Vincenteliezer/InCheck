@@ -1,31 +1,33 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { Divider, Table } from "antd"
+import { Divider, Table, Skeleton } from "antd"
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { db } from '@/firebase/config';
 
 
 export default function GetExpenses() {
     const [expenses, setExpenses] = useState([]);
-    const expensesCollectionRef = collection(db, "expense_details")
+    const expensesCollectionRef = collection(db, "expense_details");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const getAllExpenses = async () => {
-            const response = await getDocs(expensesCollectionRef);
-            setExpenses(response.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
-            console.log("EXPENSE", response.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+            setLoading(true);
+            try {
+                const response = await getDocs(expensesCollectionRef);
+                setExpenses(response.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
         }
         getAllExpenses();
     }, [])
 
 
     const columns = [
-        {
-            title: 'Timestamp',
-            dataIndex: "time",
-            key: "time"
-        },
         {
             title: 'Expense Type',
             dataIndex: 'expense_type',
@@ -43,6 +45,12 @@ export default function GetExpenses() {
         },
     ];
     return (
-        <Table dataSource={expenses} columns={columns} key="title" rowKey="id" />
+        <>
+            {loading ? (
+                <Skeleton />
+            ) : (
+                <Table dataSource={expenses} columns={columns} key="title" rowKey="id" />
+            )}
+        </>
     )
 }
